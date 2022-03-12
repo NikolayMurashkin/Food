@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', function () {
 	});
 
 
-	//Timer (teacher version)
+	// Timer (teacher version)
 
 	/*
 	const deadline = '2022-03-13';
@@ -94,7 +94,7 @@ window.addEventListener('DOMContentLoaded', function () {
 	setClock('.timer', deadline)
 	*/
 
-	//Timer (my version)
+	// Timer (my version)
 
 	const deadline = '2022-06-23';
 	function getEstimatedTime(endtime) {
@@ -130,43 +130,31 @@ window.addEventListener('DOMContentLoaded', function () {
 	}
 	timer('.timer', deadline);
 
+	// Modal
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	const modal = document.querySelector('.modal');
+	function openModal() {
+		document.addEventListener('click', (e) => {
+			if (e.target && e.target.closest('[data-modal]')) {
+				modal.classList.add('_active');
+				document.body.style.overflow = 'hidden';
+			}
+		})
+	}
+	function closeModal() {
+		document.addEventListener('click', (e) => {
+			if ((e.target && e.target.closest('[data-close]')) || e.target == modal) {
+				modal.classList.remove('_active');
+				document.body.style.overflow = '';
+			}
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal.classList.contains('_active')) {
+				modal.classList.remove('_active');
+				document.body.style.overflow = '';
+			}
+		});
+	}
+	openModal();
+	closeModal();
 });
