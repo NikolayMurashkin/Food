@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/NikolayMurashkin/Food/issues"
   },
-  "homepage": "https://github.com/NikolayMurashkin/Food#readme"
+  "homepage": "https://github.com/NikolayMurashkin/Food#readme",
+  "devDependencies": {
+    "json-server": "^0.17.0"
+  }
 }
