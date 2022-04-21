@@ -199,14 +199,14 @@ window.addEventListener('DOMContentLoaded', function () {
 		clearTimeout(openModalByTimer);
 	}
 	modal();
-	const openModalByTimer = setTimeout(openModal, 30000);
+	const openModalByTimer = setTimeout(openModal, 3000000);
 	function openModalByScroll() {
 		if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
 			openModal();
 			window.removeEventListener('scroll', openModalByScroll);
 		}
 	}
-	window.addEventListener('scroll', openModalByScroll);
+	// window.addEventListener('scroll', openModalByScroll);
 
 	// Class for cards -  my version
 
@@ -320,12 +320,20 @@ window.addEventListener('DOMContentLoaded', function () {
 		return await res.json();
 	};
 
-	getResuorce('http://localhost:3000/menu')
-		.then(data => {
-			data.forEach(({ img, altimg, title, descr, price }) => {
+	// getResuorce('http://localhost:3000/menu')
+	// 	.then(data => {
+	// 		data.forEach(({ img, altimg, title, descr, price }) => {
+	// 			new MenuCard(img, altimg, title, descr, price, '.menu__field .container', 'menu__item').createCard();
+	// 		});
+	// 	});
+
+	axios.get('http://localhost:3000/menu')
+		.then(response => {
+			response.data.forEach(({ img, altimg, title, descr, price }) => {
 				new MenuCard(img, altimg, title, descr, price, '.menu__field .container', 'menu__item').createCard();
 			});
-		});
+		})
+
 
 	/*
 	getResuorce('http://localhost:3000/menu')
@@ -356,15 +364,15 @@ window.addEventListener('DOMContentLoaded', function () {
 		success: 'Спасибо! Скоро мы с Вами свяжемся',
 		failure: 'Что-то пошло не так...'
 	}
-
+	
 	forms.forEach(item => {
 		postData(item);
 	})
-
+	
 	function postData(form) {
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
-
+	
 			const statusMessage = document.createElement('img');
 			statusMessage.src = message.loading;
 			statusMessage.style.cssText = `
@@ -372,20 +380,20 @@ window.addEventListener('DOMContentLoaded', function () {
 				margin: 0 auto;
 			`;
 			form.insertAdjacentElement('afterend', statusMessage);
-
+	
 			const formData = new FormData(form);
 			const object = {};
 			formData.forEach((value, key) => {
 				object[key] = value;
 			})
-
+	
 			fetch('server.php', {
 				method: 'POST',
 				headers: {
 					'Content-type': 'application/json',
 				},
 				body: JSON.stringify(object),
-
+	
 			})
 				.then(data => data.text())
 				.then(data => {
@@ -397,13 +405,13 @@ window.addEventListener('DOMContentLoaded', function () {
 				.finally(() => form.reset())
 		})
 	}
-
+	
 	function showThanksModal(message) {
 		const prevModalDialog = document.querySelector('.modal__dialog');
-
+	
 		prevModalDialog.classList.add('hide');
 		openModal();
-
+	
 		const thanksModal = document.createElement('div');
 		thanksModal.classList.add('modal__dialog');
 		thanksModal.innerHTML = `
@@ -413,7 +421,7 @@ window.addEventListener('DOMContentLoaded', function () {
 				${message}
 			</div>
 		</div>`;
-
+	
 		document.querySelector('.modal').append(thanksModal);
 		setTimeout(() => {
 			thanksModal.remove();
@@ -421,7 +429,7 @@ window.addEventListener('DOMContentLoaded', function () {
 			prevModalDialog.classList.remove('hide');
 			closeModal();
 		}, 3000)
-
+	
 	}*/
 
 	const forms = document.querySelectorAll('form');
@@ -495,8 +503,159 @@ window.addEventListener('DOMContentLoaded', function () {
 
 	}
 
+	// slider
 
-	fetch('http://localhost:3000/menu')
-		.then(data => data.json())
-		.then(result => console.log(result))
+	const slides = document.querySelectorAll('.offer__slide');
+	const prev = document.querySelector('.offer__slider-prev');
+	const next = document.querySelector('.offer__slider-next');
+	const countCurrent = document.querySelector('#current');
+	const countTotal = document.querySelector('#total');
+	const slidesWrapper = document.querySelector('.offer__slider-wrapper');
+	const slidesField = document.querySelector('.offer__slider-inner');
+	const width = window.getComputedStyle(slidesWrapper).width;
+
+	const slider = document.querySelector('.offer__slider');
+	slider.style.position = 'relative';
+	const carouselIndicators = document.createElement('div');
+	const dot = document.createElement('span');
+	carouselIndicators.classList.add('carousel-indicators');
+	dot.classList.add('dot');
+	slider.append(carouselIndicators);
+	for (let i = 1; i < slides.length; i++) {
+		carouselIndicators.append(dot);
+		carouselIndicators.append(dot.cloneNode());
+	};
+
+	let slideIndex = 1;
+	let offset = 0;
+
+	slidesField.style.width = 100 * slides.length + '%';
+	slidesField.style.cssText = `
+		display: flex;
+		transition: all 0.5s ease 0s;
+		
+	`
+	slides.forEach(slide => {
+		slide.style.minWidth = width;
+	});
+
+	sliderInit(slideIndex);
+	pagination();
+	if (slides.length < 10) {
+		countTotal.textContent = `0${slides.length}`;
+		countCurrent.textContent = `0${slideIndex}`
+	} else {
+		countCurrent.textContent = `${slideIndex}`;
+		countTotal.textContent = `${slides.length}`;
+	}
+	next.addEventListener('click', () => {
+		slideIndex++;
+		sliderInit(slideIndex);
+		if (offset == parseInt(width) * (slides.length - 1)) {
+			offset = 0;
+		} else {
+			offset += parseInt(width);
+		}
+		countCurrent.textContent = `0${slideIndex}`
+		slidesField.style.transform = `translateX(-${offset}px)`;
+		pagination();
+	})
+	prev.addEventListener('click', () => {
+		slideIndex--;
+		sliderInit(slideIndex);
+		if (offset === 0) {
+			offset = parseInt(width) * (slides.length - 1);
+		} else {
+			offset -= parseInt(width);
+		}
+		countCurrent.textContent = `0${slideIndex}`
+		slidesField.style.transform = `translateX(-${offset}px)`;
+		pagination();
+	})
+	function pagination() {
+		const dots = document.querySelectorAll('.dot');
+		for (let i = 0; i < slides.length; i++) {
+			if (slides[i].classList.contains('_active')) {
+				dots[i].style.opacity = '1';
+			} else {
+				dots[i].style.opacity = '.5';
+			}
+		}
+		window.addEventListener('click', (e) => {
+			if (e.target.closest('.dot')) {
+				for (let i = 0; i < dots.length; i++) {
+					if (e.target === dots[i]) {
+						slides.forEach(slide => slide.classList.remove('_active'));
+						slides[i].classList.add('_active');
+						offset = parseInt(width) * i;
+						slidesField.style.transform = `translateX(-${offset}px)`;
+						slideIndex = i + 1;
+						slides.forEach((slide, i) => {
+							if (slide.classList.contains('_active')) {
+								dots[i].style.opacity = '1';
+							} else {
+								dots[i].style.opacity = '.5';
+							}
+						})
+						countCurrent.textContent = `0${slideIndex}`
+					}
+				}
+			}
+		})
+	}
+	function sliderInit(n) {
+		if (n > slides.length) {
+			slideIndex = 1;
+		}
+		if (n < 1) {
+			slideIndex = slides.length;
+		}
+		slides.forEach(slide => {
+			slide.classList.remove('_active');
+		});
+		slides[slideIndex - 1].classList.add('_active');
+	}
+
+
+	/*showSlides(slideIndex);
+	counter(slides, countCurrent, countTotal);
+	next.addEventListener('click', () => {
+		slideIndex++;
+		showSlides(slideIndex);
+		counter(slides, countCurrent, countTotal);
+	})
+	prev.addEventListener('click', () => {
+		slideIndex--;
+		showSlides(slideIndex);
+		counter(slides, countCurrent, countTotal);
+	})
+	function counter(slides, current, total) {
+		if (slides.length < 10) {
+			total.textContent = `0${slides.length}`;
+			current.textContent = `0${slideIndex}`
+		} else {
+			total.textContent = `${slides.length}`;
+			current.textContent = `${slideIndex}`
+		}
+
+	}
+	function showSlides(n) {
+		if (n > slides.length) {
+			slideIndex = 1;
+		}
+		if (n < 1) {
+			slideIndex = slides.length;
+		}
+
+		slides.forEach(slide => {
+			slide.classList.add('hide');
+			slide.classList.remove('show');
+		});
+		slides[slideIndex - 1].classList.add('show');
+		slides[slideIndex - 1].classList.remove('hide');
+
+	}*/
+
+
+
 });
